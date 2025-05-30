@@ -14,12 +14,26 @@ export default function Home() {
 
   const extractVideoId = (input: string): string => {
     try {
-      const u = new URL(input);
-      if (u.hostname.includes('youtu.be')) return u.pathname.slice(1);
-      if (u.hostname.includes('youtube.com')) return u.searchParams.get('v') || '';
+      const url = new URL(input);
+  
+      if (url.hostname.includes('youtu.be')) {
+        return url.pathname.slice(1);
+      }
+  
+      if (url.hostname.includes('youtube.com')) {
+        if (url.pathname.startsWith('/watch')) {
+          return url.searchParams.get('v') || '';
+        }
+  
+        if (url.pathname.startsWith('/shorts')) {
+          const parts = url.pathname.split('/');
+          return parts.length >= 3 ? parts[2] : '';
+        }
+      }
     } catch {
       return '';
     }
+  
     return '';
   };
 
