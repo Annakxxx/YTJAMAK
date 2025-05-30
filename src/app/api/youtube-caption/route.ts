@@ -8,6 +8,11 @@ interface CaptionData {
   text: string;
 }
 
+interface CaptionTrack {
+  languageCode: string;
+  baseUrl: string;
+}
+
 function parseCaptions(xmlData: string) {
   const dom = new JSDOM(xmlData, { contentType: 'text/xml' });
   return Array.from(dom.window.document.getElementsByTagName('text')).map((el) => ({
@@ -44,7 +49,7 @@ export async function GET(req: Request) {
     const tracks = playerResponse?.captions?.playerCaptionsTracklistRenderer?.captionTracks;
     if (!tracks || tracks.length === 0) throw new Error('No captionTracks found');
 
-    const koTrack = tracks.find((t: any) => t.languageCode === 'ko');
+    const koTrack = tracks.find((t: CaptionTrack) => t.languageCode === 'ko');
     const selectedTrack = koTrack || tracks[0];
     const captionRes = await axios.get(selectedTrack.baseUrl);
 
