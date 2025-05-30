@@ -2,10 +2,6 @@
 
 import { useState } from 'react';
 
-interface CaptionData {
-  captions: string | Array<{ text: string }>;
-}
-
 export default function Home() {
   const [url, setUrl] = useState('');
   const [caption, setCaption] = useState('');
@@ -37,9 +33,9 @@ export default function Home() {
 
     try {
       const captionResponse = await fetch(`/api/youtube-caption?videoId=${videoId}`);
-      const captionData = await captionResponse.json() as CaptionData;
+      const captionData = await captionResponse.json();
       const raw = Array.isArray(captionData.captions)
-        ? captionData.captions.map((c) => c.text).join('\n')
+        ? captionData.captions.map((c: any) => c.text).join('\n')
         : captionData.captions;
 
       const fixedResponse = await fetch('/api/fix-captions', {
@@ -49,8 +45,7 @@ export default function Home() {
       });
       const { result } = await fixedResponse.json();
       setCaption(result);
-    } catch (error) {
-      console.error('Error processing caption:', error);
+    } catch (err) {
       setError('자막 처리 중 오류가 발생했습니다.');
     } finally {
       setLoading(false);
