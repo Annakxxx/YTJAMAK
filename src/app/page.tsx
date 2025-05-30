@@ -2,6 +2,10 @@
 
 import { useState } from 'react';
 
+interface CaptionData {
+  text: string;
+}
+
 export default function Home() {
   const [url, setUrl] = useState('');
   const [caption, setCaption] = useState('');
@@ -35,7 +39,7 @@ export default function Home() {
       const captionResponse = await fetch(`/api/youtube-caption?videoId=${videoId}`);
       const captionData = await captionResponse.json();
       const raw = Array.isArray(captionData.captions)
-        ? captionData.captions.map((c: any) => c.text).join('\n')
+        ? captionData.captions.map((c: CaptionData) => c.text).join('\n')
         : captionData.captions;
 
       const fixedResponse = await fetch('/api/fix-captions', {
@@ -45,7 +49,7 @@ export default function Home() {
       });
       const { result } = await fixedResponse.json();
       setCaption(result);
-    } catch (err) {
+    } catch {
       setError('자막 처리 중 오류가 발생했습니다.');
     } finally {
       setLoading(false);
@@ -75,10 +79,20 @@ export default function Home() {
       {error && <p className="text-red-500 mb-4">{error}</p>}
 
       {caption && (
-        <div className="bg-gray-100 rounded p-4 whitespace-pre-wrap">
-          {caption}
-        </div>
-      )}
+  <div className="bg-gray-100 rounded p-4 whitespace-pre-wrap relative">
+    <button
+      onClick={async () => {
+        await navigator.clipboard.writeText(caption);
+        alert('자막이 클립보드에 복사되었습니다.');
+      }}
+      className="absolute top-2 right-2 text-sm text-blue-600 underline hover:text-blue-800"
+    >
+      복사하기
+    </button>
+    {caption}
+  </div>
+)}
+
     </main>
   );
 }

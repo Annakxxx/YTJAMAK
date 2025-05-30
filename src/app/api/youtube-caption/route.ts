@@ -4,6 +4,10 @@ import { NextResponse } from 'next/server';
 
 export const runtime = 'nodejs';
 
+interface CaptionData {
+  text: string;
+}
+
 function parseCaptions(xmlData: string) {
   const dom = new JSDOM(xmlData, { contentType: 'text/xml' });
   return Array.from(dom.window.document.getElementsByTagName('text')).map((el) => ({
@@ -46,7 +50,10 @@ export async function GET(req: Request) {
 
     // 4. XML 자막 파싱
     const captions = parseCaptions(captionRes.data);
-    return NextResponse.json({ captions }, { status: 200 });
+    const raw = Array.isArray(captions)
+      ? captions.map((c: CaptionData) => c.text).join('\n')
+      : captions;
+    return NextResponse.json({ captions: raw }, { status: 200 });
   } catch (error) {
     console.error('❌ 자막 추출 실패:', error);
     return NextResponse.json({ error: '자막을 불러오지 못했습니다.' }, { status: 500 });
